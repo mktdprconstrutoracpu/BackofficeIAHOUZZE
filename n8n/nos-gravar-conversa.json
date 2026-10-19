@@ -1,0 +1,54 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": "ia_mensagens",
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "telefone", "fieldValue": "={{ $json.telefone }}" },
+            { "fieldId": "nome_whatsapp", "fieldValue": "={{ $json.nome_whatsapp }}" },
+            { "fieldId": "direcao", "fieldValue": "cliente" },
+            { "fieldId": "tipo", "fieldValue": "text" },
+            { "fieldId": "texto", "fieldValue": "={{ $json.chatInput }}" },
+            { "fieldId": "wa_id", "fieldValue": "={{ $json.message_id }}" }
+          ]
+        }
+      },
+      "id": "7c1f0a2e-0001-4b7a-9d3e-1a2b3c4d0001",
+      "name": "Gravar mensagem do cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1520, -80],
+      "onError": "continueRegularOutput",
+      "notes": "Grava o que o cliente escreveu. Ligado na saida de Dados, em paralelo com o Agente Houzze. Se der erro, nao trava a resposta da Ana."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": "ia_mensagens",
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "telefone", "fieldValue": "={{ $('Dados').item.json.telefone }}" },
+            { "fieldId": "nome_whatsapp", "fieldValue": "={{ $('Dados').item.json.nome_whatsapp }}" },
+            { "fieldId": "direcao", "fieldValue": "ana" },
+            { "fieldId": "tipo", "fieldValue": "text" },
+            { "fieldId": "texto", "fieldValue": "={{ $json.output }}" }
+          ]
+        }
+      },
+      "id": "7c1f0a2e-0002-4b7a-9d3e-1a2b3c4d0002",
+      "name": "Gravar resposta da Ana",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2144, -80],
+      "onError": "continueRegularOutput",
+      "notes": "Grava a resposta da Ana. Ligado na saida do Agente Houzze, em paralelo com Enviar WhatsApp. Se der erro, nao trava o envio."
+    }
+  ],
+  "connections": {}
+}
