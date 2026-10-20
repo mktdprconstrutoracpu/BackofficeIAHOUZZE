@@ -1,0 +1,82 @@
+{
+  "name": "Houzze - Leads para o backoffice",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "minutes", "minutesInterval": 5 } ] }
+      },
+      "id": "7a1c3e55-0001-4b8d-9f2a-6c5d4e3f0001",
+      "name": "A cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1cPm6ESWgewvkF_Kwt5zkiCUv7f6DUEsj3aFwFLleYP0",
+          "mode": "list",
+          "cachedResultName": "Houzze - Caucaia II",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cPm6ESWgewvkF_Kwt5zkiCUv7f6DUEsj3aFwFLleYP0/edit?usp=drivesdk"
+        },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "options": {
+          "outputFormatting": { "values": { "general": "FORMATTED_VALUE", "date": "FORMATTED_STRING" } }
+        }
+      },
+      "id": "7a1c3e55-0002-4b8d-9f2a-6c5d4e3f0002",
+      "name": "Ler aba Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [240, 0],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "NaIl7W77gVMJd0Uc", "name": "Google Sheets - Houzze" } },
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta o lote para o Supabase a partir das linhas da aba Leads.\n// chave = telefone (so digitos) + data_hora: nao muda se a linha mudar de lugar na planilha.\nfunction texto(v) { return v == null ? '' : String(v).trim(); }\nfunction digitos(v) { return texto(v).replace(/\\D/g, ''); }\nfunction dataBr(v) { // dd/MM/yyyy -> yyyy-MM-dd, ou null\n  const m = texto(v).match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/);\n  if (!m) return null;\n  const d = m[1].padStart(2, '0'), mes = m[2].padStart(2, '0');\n  return m[3] + '-' + mes + '-' + d;\n}\nfunction dataHoraBr(v) { // dd/MM/yyyy HH:mm -> ISO com fuso de Sao Paulo, ou null\n  const m = texto(v).match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})(?:\\s+(\\d{1,2}):(\\d{2}))?/);\n  if (!m) return null;\n  return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0') + 'T' + (m[4] || '00').padStart(2, '0') + ':' + (m[5] || '00') + ':00-03:00';\n}\nconst lote = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  const telefone = digitos(r.telefone);\n  const dataHora = texto(r.data_hora);\n  if (!telefone && !texto(r.nome)) continue; // linha vazia\n  lote.push({\n    chave: (telefone || 'sem-telefone') + '|' + (dataHora || ('linha-' + (r.row_number || ''))),\n    registrado_em: dataHoraBr(dataHora),\n    data_hora_texto: dataHora,\n    nome: texto(r.nome).slice(0, 120),\n    telefone: telefone,\n    interesse: texto(r.interesse).slice(0, 60),\n    renda_informada: texto(r.renda_informada).slice(0, 60),\n    unidade_interesse: texto(r.unidade_interesse).slice(0, 40),\n    visita_dia: dataBr(r.visita_dia),\n    visita_periodo: texto(r.visita_periodo).slice(0, 20),\n    resumo: texto(r.resumo).slice(0, 1000),\n    status: texto(r.status).slice(0, 40),\n    corretor: texto(r.corretor).slice(0, 80),\n    origem: texto(r.origem).slice(0, 40)\n  });\n}\nif (!lote.length) return [];\nreturn [{ json: { lote, quantos: lote.length } }];"
+      },
+      "id": "7a1c3e55-0003-4b8d-9f2a-6c5d4e3f0003",
+      "name": "Montar lote",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://roashkfdjgsweuftqhyx.supabase.co/rest/v1/ia_agendamentos?on_conflict=chave",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Prefer", "value": "resolution=merge-duplicates,return=minimal" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.lote) }}",
+        "options": {}
+      },
+      "id": "7a1c3e55-0004-4b8d-9f2a-6c5d4e3f0004",
+      "name": "Gravar no Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": { "supabaseApi": { "id": "78SMvtz6Dg81Ounq", "name": "Supabase Houzze" } },
+      "notes": "Upsert em ia_agendamentos pela chave (Prefer: resolution=merge-duplicates). Status e corretor editados na planilha chegam no backoffice no proximo ciclo."
+    }
+  ],
+  "connections": {
+    "A cada 5 minutos": { "main": [ [ { "node": "Ler aba Leads", "type": "main", "index": 0 } ] ] },
+    "Ler aba Leads": { "main": [ [ { "node": "Montar lote", "type": "main", "index": 0 } ] ] },
+    "Montar lote": { "main": [ [ { "node": "Gravar no Supabase", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "pinData": {}
+}

@@ -1,0 +1,95 @@
+{
+  "name": "Houzze - Ana retomada",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "minutes", "minutesInterval": 5 } ] }
+      },
+      "id": "6f0d2a10-0001-4c1e-9a7b-5e2d3c4b0001",
+      "name": "A cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ia_para_retomar",
+        "returnAll": true,
+        "filterType": "none"
+      },
+      "id": "6f0d2a10-0002-4c1e-9a7b-5e2d3c4b0002",
+      "name": "Conversas paradas",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [240, 0],
+      "credentials": { "supabaseApi": { "id": "78SMvtz6Dg81Ounq", "name": "Supabase Houzze" } },
+      "notes": "Le a visao ia_para_retomar: conversas em que a Ana falou por ultimo e o cliente esta ha 20 min sem responder (etapa retomada) ou ja recebeu a retomada ha 20 min (etapa encerramento)."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "t1", "name": "telefone", "value": "={{ $json.telefone }}", "type": "string" },
+            { "id": "t2", "name": "nome_whatsapp", "value": "={{ $json.nome_whatsapp || '' }}", "type": "string" },
+            { "id": "t3", "name": "etapa", "value": "={{ $json.etapa }}", "type": "string" },
+            { "id": "t4", "name": "texto", "value": "={{ $json.etapa === 'retomada' ? ('Oi' + ($json.nome_whatsapp ? ', ' + String($json.nome_whatsapp).split(' ')[0] : '') + '! Ficou alguma dúvida sobre o Caucaia II? Posso te ajudar com mais alguma coisa?') : ('Vou encerrar nosso atendimento por aqui por enquanto' + ($json.nome_whatsapp ? ', ' + String($json.nome_whatsapp).split(' ')[0] : '') + '. Quando quiser retomar, é só me chamar nesta conversa que eu respondo na hora. Até logo!') }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f0d2a10-0003-4c1e-9a7b-5e2d3c4b0003",
+      "name": "Montar mensagem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1346907115179061",
+        "recipientPhoneNumber": "={{ $json.telefone }}",
+        "textBody": "={{ $json.texto }}",
+        "additionalFields": {}
+      },
+      "id": "6f0d2a10-0004-4c1e-9a7b-5e2d3c4b0004",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [720, 0],
+      "credentials": { "whatsAppApi": { "id": "6d83fdWCZamlcroQ", "name": "WhatsApp account" } },
+      "onError": "continueErrorOutput",
+      "notes": "Se a Meta recusar (janela de 24 h fechada, por exemplo), o item sai pela saida de erro e nao e gravado."
+    },
+    {
+      "parameters": {
+        "tableId": "ia_mensagens",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "telefone", "fieldValue": "={{ $('Montar mensagem').item.json.telefone }}" },
+            { "fieldId": "nome_whatsapp", "fieldValue": "={{ $('Montar mensagem').item.json.nome_whatsapp }}" },
+            { "fieldId": "direcao", "fieldValue": "ana" },
+            { "fieldId": "tipo", "fieldValue": "={{ $('Montar mensagem').item.json.etapa }}" },
+            { "fieldId": "texto", "fieldValue": "={{ $('Montar mensagem').item.json.texto }}" }
+          ]
+        }
+      },
+      "id": "6f0d2a10-0005-4c1e-9a7b-5e2d3c4b0005",
+      "name": "Gravar no historico",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [960, 0],
+      "credentials": { "supabaseApi": { "id": "78SMvtz6Dg81Ounq", "name": "Supabase Houzze" } },
+      "onError": "continueRegularOutput",
+      "notes": "Grava a retomada/encerramento em ia_mensagens com tipo = etapa. O gatilho do banco atualiza ia_conversas, e e isso que impede mandar de novo."
+    }
+  ],
+  "connections": {
+    "A cada 5 minutos": { "main": [ [ { "node": "Conversas paradas", "type": "main", "index": 0 } ] ] },
+    "Conversas paradas": { "main": [ [ { "node": "Montar mensagem", "type": "main", "index": 0 } ] ] },
+    "Montar mensagem": { "main": [ [ { "node": "Enviar WhatsApp", "type": "main", "index": 0 } ] ] },
+    "Enviar WhatsApp": { "main": [ [ { "node": "Gravar no historico", "type": "main", "index": 0 } ], [] ] }
+  },
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "pinData": {}
+}

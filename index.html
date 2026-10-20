@@ -188,6 +188,49 @@ a { color: var(--ceu); }
   height: calc(100vh - 61px);
 }
 
+/* abas Conversas | Agendamentos */
+.abas { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(23, 38, 65, 0.7); border: 1px solid var(--linha); margin-left: 6px; }
+.aba { border: 0; background: transparent; color: var(--texto-2); padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.aba:hover { color: var(--texto); }
+.aba[aria-pressed="true"] { background: var(--ceu); color: var(--ceu-tinta); }
+.aba-qtd { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(11, 19, 34, 0.18); font-variant-numeric: tabular-nums; }
+.aba[aria-pressed="false"] .aba-qtd { background: rgba(141, 185, 236, 0.18); color: var(--ceu-2); }
+
+/* agendamentos */
+.agenda { height: calc(100vh - 61px); overflow-y: auto; padding: 24px 24px 60px; }
+.agenda-cabeca { max-width: 1040px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.agenda h2 { margin: 0 0 4px; font-family: var(--display); font-variation-settings: 'wdth' 108, 'wght' 720; font-size: 24px; letter-spacing: -0.02em; line-height: 1.1; }
+.agenda h2 .serif { font-size: 1.1em; }
+.agenda-sub { margin: 0; color: var(--texto-2); font-size: 13px; max-width: 56ch; }
+.busca-agenda { width: min(100%, 320px); }
+.filtros-agenda { max-width: 1040px; margin: 16px auto 0; padding: 0; }
+.agenda-lista { max-width: 1040px; margin: 10px auto 0; }
+.ag-grupo { margin: 22px 4px 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--texto-3); display: flex; align-items: center; gap: 10px; }
+.ag-grupo::after { content: ""; flex: 1; height: 1px; background: var(--linha); }
+.ag-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.ag-cartao { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; padding: 14px; border-radius: var(--raio-p); background: var(--painel); border: 1px solid var(--linha); }
+.ag-cartao.passado { opacity: 0.72; }
+.ag-data { text-align: center; border-radius: 12px; background: rgba(141, 185, 236, 0.12); border: 1px solid rgba(141, 185, 236, 0.22); padding: 8px 4px; align-self: start; }
+.ag-data b { display: block; font-family: var(--display); font-variation-settings: 'wdth' 105, 'wght' 740; font-size: 22px; line-height: 1; color: var(--ceu-2); }
+.ag-data span { display: block; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-3); margin-top: 4px; }
+.ag-data.sem { background: rgba(233, 220, 198, 0.08); border-color: rgba(233, 220, 198, 0.2); }
+.ag-data.sem b { color: var(--areia); font-size: 16px; padding-top: 4px; }
+.ag-corpo { min-width: 0; }
+.ag-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.ag-nome { font-family: var(--display); font-variation-settings: 'wdth' 105, 'wght' 680; font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ag-status { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: rgba(141, 185, 236, 0.16); color: var(--ceu-2); white-space: nowrap; }
+.ag-status.corretor { background: rgba(233, 220, 198, 0.16); color: var(--areia); }
+.ag-status.ok { background: rgba(90, 211, 154, 0.16); color: var(--ok); }
+.ag-status.cancelado { background: rgba(240, 138, 138, 0.16); color: var(--erro); }
+.ag-tel { font-size: 12.5px; color: var(--texto-2); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.ag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ag-chips span { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: rgba(141, 185, 236, 0.1); color: var(--texto-2); }
+.ag-resumo { margin: 10px 0 0; font-size: 13px; color: var(--texto-2); line-height: 1.5; }
+.ag-pe { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.ag-quando { font-size: 11.5px; color: var(--texto-3); }
+.ag-acoes { display: flex; gap: 6px; }
+.ag-acoes .botao { height: auto; padding: 6px 11px; font-size: 12px; }
+
 /* lista */
 .lista {
   border-right: 1px solid var(--linha);
@@ -216,7 +259,9 @@ a { color: var(--ceu); }
 }
 .busca input:focus { border-color: var(--ceu); box-shadow: 0 0 0 4px rgba(141, 185, 236, 0.16); }
 .filtros { display: flex; gap: 6px; padding: 0 18px 12px; }
+.filtros { overflow-x: auto; scrollbar-width: none; }
 .filtro {
+  white-space: nowrap; flex: none;
   border: 1px solid transparent; background: transparent;
   color: var(--texto-3);
   padding: 6px 12px; border-radius: 999px;
@@ -314,7 +359,12 @@ a { color: var(--ceu); }
 @media (max-width: 860px) {
   .stats { display: none; }
   .quem { display: none; }
-  .painel { grid-template-columns: 1fr; height: calc(100vh - 57px); }
+  .topo { flex-wrap: wrap; row-gap: 8px; }
+  .abas { order: 5; flex: 1 0 100%; margin-left: 0; }
+  .aba { flex: 1; justify-content: center; }
+  .painel { grid-template-columns: 1fr; height: calc(100vh - 112px); }
+  .agenda { height: calc(100vh - 112px); padding: 16px 14px 60px; }
+  .ag-grade { grid-template-columns: 1fr; }
   .lista { border-right: 0; }
   .thread { display: none; }
   .app.aberta .lista { display: none; }
@@ -370,6 +420,10 @@ a { color: var(--ceu); }
 <div class="app" id="app" hidden>
   <header class="topo">
     <div class="marca">Houzze<small>Conversas da Ana</small></div>
+    <nav class="abas" aria-label="Seções">
+      <button class="aba" type="button" data-aba="conversas" aria-pressed="true">Conversas</button>
+      <button class="aba" type="button" data-aba="agendamentos" aria-pressed="false">Agendamentos <b class="aba-qtd" id="abaAgQtd" hidden>0</b></button>
+    </nav>
     <div class="stats" aria-label="Resumo">
       <span class="stat"><b id="statHoje">0</b> conversas hoje</span>
       <span class="stat"><b id="statMsgHoje">0</b> mensagens hoje</span>
@@ -382,7 +436,29 @@ a { color: var(--ceu); }
     </div>
   </header>
 
-  <div class="painel">
+  <!-- ============ aba Agendamentos ============ -->
+  <section class="agenda" id="painelAgenda" hidden aria-label="Agendamentos">
+    <div class="agenda-cabeca">
+      <div>
+        <h2>Visitas <span class="serif">agendadas</span></h2>
+        <p class="agenda-sub">O que a Ana registrou na planilha de leads: visitas marcadas, contatos e repasses ao corretor.</p>
+      </div>
+      <div class="busca busca-agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="sr" for="buscaAgenda">Buscar por nome ou número</label>
+        <input id="buscaAgenda" type="search" placeholder="Buscar por nome ou número" autocomplete="off">
+      </div>
+    </div>
+    <div class="filtros filtros-agenda" role="group" aria-label="Filtro">
+      <button class="filtro" type="button" data-filtro-ag="proximas" aria-pressed="true">Próximas</button>
+      <button class="filtro" type="button" data-filtro-ag="passadas" aria-pressed="false">Passadas</button>
+      <button class="filtro" type="button" data-filtro-ag="semvisita" aria-pressed="false">Sem visita</button>
+      <button class="filtro" type="button" data-filtro-ag="todas" aria-pressed="false">Todas</button>
+    </div>
+    <div class="agenda-lista" id="agendaLista"></div>
+  </section>
+
+  <div class="painel" id="painelConversas">
     <aside class="lista">
       <div class="lista-cabeca">
         <h2>Quem falou <span class="serif">com a Ana</span></h2>
@@ -555,8 +631,110 @@ a { color: var(--ceu); }
     $('quem').title = usuario.email;
     mostrar('app');
     await carregarConversas();
+    carregarAgendamentos();
     ligarAoVivo();
   }
+
+  /* ---------------- abas ---------------- */
+  function mostrarAba(nome) {
+    estado.aba = nome;
+    Array.prototype.forEach.call(document.querySelectorAll('.aba'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-aba') === nome)); });
+    $('painelConversas').hidden = nome !== 'conversas';
+    $('painelAgenda').hidden = nome !== 'agendamentos';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.aba'), function (b) { b.addEventListener('click', function () { mostrarAba(b.getAttribute('data-aba')); }); });
+
+  /* ---------------- agendamentos ---------------- */
+  estado.agendamentos = []; estado.filtroAg = 'proximas'; estado.buscaAg = ''; estado.aba = 'conversas';
+  async function carregarAgendamentos() {
+    var r = await sb.from('ia_agendamentos').select('*').order('visita_dia', { ascending: true, nullsFirst: false }).limit(1000);
+    if (r.error) { console.warn('agendamentos', r.error.message); return; }
+    estado.agendamentos = r.data || [];
+    renderAgenda();
+  }
+  function hojeStr() { return diaDe(new Date()); }
+  function fmtDiaAgenda(iso) {
+    var h = hojeStr(), amanha = diaDe(new Date(Date.now() + 86400000));
+    if (iso === h) return 'Hoje';
+    if (iso === amanha) return 'Amanhã';
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO, weekday: 'long', day: '2-digit', month: 'long' }).format(new Date(iso + 'T12:00:00-03:00'));
+  }
+  function classeStatus(s) {
+    s = (s || '').toLowerCase();
+    if (/cancel|desist/.test(s)) return 'cancelado';
+    if (/realiz|conclu|visitou|fechou|vend/.test(s)) return 'ok';
+    if (/corretor|humano|outro|contato|repass/.test(s)) return 'corretor';
+    return '';
+  }
+  function agendamentosVisiveis() {
+    var h = hojeStr(), lista = estado.agendamentos.slice();
+    if (estado.filtroAg === 'proximas') lista = lista.filter(function (a) { return a.visita_dia && a.visita_dia >= h; }).sort(function (a, b) { return a.visita_dia < b.visita_dia ? -1 : a.visita_dia > b.visita_dia ? 1 : 0; });
+    else if (estado.filtroAg === 'passadas') lista = lista.filter(function (a) { return a.visita_dia && a.visita_dia < h; }).sort(function (a, b) { return a.visita_dia > b.visita_dia ? -1 : 1; });
+    else if (estado.filtroAg === 'semvisita') lista = lista.filter(function (a) { return !a.visita_dia; }).sort(function (a, b) { return (a.registrado_em || '') > (b.registrado_em || '') ? -1 : 1; });
+    else lista.sort(function (a, b) { var x = a.visita_dia || '0000', y = b.visita_dia || '0000'; return x > y ? -1 : x < y ? 1 : ((a.registrado_em || '') > (b.registrado_em || '') ? -1 : 1); });
+    var b = estado.buscaAg.trim().toLowerCase(), bd = b.replace(/\D/g, '');
+    if (b) lista = lista.filter(function (a) { return (a.nome || '').toLowerCase().indexOf(b) !== -1 || (bd && (a.telefone || '').indexOf(bd) !== -1) || (a.unidade_interesse || '').toLowerCase().indexOf(b) !== -1; });
+    return lista;
+  }
+  function cartaoAgenda(a) {
+    var h = hojeStr();
+    var passado = a.visita_dia && a.visita_dia < h;
+    var data = a.visita_dia
+      ? '<div class="ag-data"><b>' + esc(a.visita_dia.slice(8, 10)) + '</b><span>' + esc(new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO, month: 'short' }).format(new Date(a.visita_dia + 'T12:00:00-03:00')).replace('.', '')) + '</span><span>' + esc((a.visita_periodo || '').replace('manha', 'manhã')) + '</span></div>'
+      : '<div class="ag-data sem"><b>sem</b><span>visita</span></div>';
+    var chips = [];
+    if (a.interesse) chips.push('<span>' + esc(a.interesse) + '</span>');
+    if (a.unidade_interesse) chips.push('<span>unidade ' + esc(a.unidade_interesse) + '</span>');
+    if (a.renda_informada) chips.push('<span>renda ' + esc(a.renda_informada) + '</span>');
+    if (a.corretor) chips.push('<span>corretor: ' + esc(a.corretor) + '</span>');
+    var temConversa = estado.conversas.some(function (c) { return c.telefone === a.telefone; });
+    return '<article class="ag-cartao' + (passado ? ' passado' : '') + '">' + data +
+      '<div class="ag-corpo"><div class="ag-topo"><span class="ag-nome">' + esc(a.nome || fmtTel(a.telefone) || 'Sem nome') + '</span>' +
+      (a.status ? '<span class="ag-status ' + classeStatus(a.status) + '">' + esc(a.status) + '</span>' : '') + '</div>' +
+      '<div class="ag-tel">' + esc(fmtTel(a.telefone)) + (a.visita_dia ? ' · ' + esc(fmtDiaAgenda(a.visita_dia)) : '') + '</div>' +
+      (chips.length ? '<div class="ag-chips">' + chips.join('') + '</div>' : '') +
+      (a.resumo ? '<p class="ag-resumo">' + esc(a.resumo) + '</p>' : '') +
+      '<div class="ag-pe"><span class="ag-quando">' + (a.data_hora_texto ? 'registrado em ' + esc(a.data_hora_texto) : '') + '</span>' +
+      '<div class="ag-acoes">' + (temConversa ? '<button class="botao vazio pequeno" type="button" data-abrir-conversa="' + esc(a.telefone) + '">Abrir conversa</button>' : '') +
+      (a.telefone ? '<a class="botao pequeno" href="https://wa.me/' + esc(a.telefone) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') + '</div></div></div></article>';
+  }
+  function renderAgenda() {
+    var h = hojeStr();
+    var proximas = estado.agendamentos.filter(function (a) { return a.visita_dia && a.visita_dia >= h; }).length;
+    var qtd = $('abaAgQtd'); qtd.hidden = proximas === 0; qtd.textContent = proximas;
+    var lista = agendamentosVisiveis();
+    var box = $('agendaLista');
+    if (!lista.length) {
+      box.innerHTML = '<div class="vazio">' + (estado.agendamentos.length
+        ? '<b>Nada por aqui</b>Nenhum agendamento com esse filtro ou busca.'
+        : '<b>Nenhum agendamento ainda</b>Quando a Ana registrar um lead, ele aparece aqui em até 5 minutos.') + '</div>';
+      return;
+    }
+    // agrupa: proximas por dia; o resto por secao
+    var html = '', grupoAtual = null, cartoes = [];
+    function fechar() { if (!cartoes.length) return; html += '<div class="ag-grupo">' + esc(grupoAtual) + '</div><div class="ag-grade">' + cartoes.join('') + '</div>'; cartoes = []; }
+    lista.forEach(function (a) {
+      var g = a.visita_dia ? (a.visita_dia >= h ? fmtDiaAgenda(a.visita_dia) : 'Visitas passadas') : 'Sem visita marcada';
+      if (g !== grupoAtual) { fechar(); grupoAtual = g; }
+      cartoes.push(cartaoAgenda(a));
+    });
+    fechar();
+    box.innerHTML = html;
+  }
+  $('buscaAgenda').addEventListener('input', function () { estado.buscaAg = this.value; renderAgenda(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-filtro-ag]'), function (b) {
+    b.addEventListener('click', function () {
+      estado.filtroAg = b.getAttribute('data-filtro-ag');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-filtro-ag]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      renderAgenda();
+    });
+  });
+  $('agendaLista').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-abrir-conversa]'); if (!b) return;
+    mostrarAba('conversas'); abrir(b.getAttribute('data-abrir-conversa'));
+  });
+  // gancho para o teste automatizado desenhar a aba com dados de exemplo
+  window.__houzze = { renderAgenda: function (lista) { estado.agendamentos = lista; renderAgenda(); } };
 
   /* ---------------- dados ---------------- */
   async function carregarConversas() {
@@ -694,6 +872,9 @@ a { color: var(--ceu); }
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ia_mensagens' }, function (payload) {
         chegou(payload.new);
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ia_agendamentos' }, function () {
+        carregarAgendamentos();
+      })
       .subscribe(function (status) {
         if (status === 'SUBSCRIBED') marcarVivo(true, 'ao vivo');
         else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') marcarVivo(false, 'atualizando a cada 45 s');
@@ -703,6 +884,7 @@ a { color: var(--ceu); }
     estado.relogio = setInterval(function () {
       if (document.hidden) return;
       carregarConversas();
+      carregarAgendamentos();
       if (estado.aberta) recarregarAberta();
     }, POLL_MS);
     document.addEventListener('visibilitychange', aoVoltar);

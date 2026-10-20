@@ -14,6 +14,15 @@ aplicativo do WhatsApp; aqui elas aparecem com o numero do cliente, o nome do pe
 3. Esta pagina (`index.html`, sem build) faz login pelo Supabase Auth, le as duas tabelas e recebe mensagens
    novas em tempo real.
 
+## Alem das conversas
+
+- **Aba Agendamentos:** o que a Ana registra na aba "Leads" da planilha (visitas marcadas, contatos, repasses ao
+  corretor). O fluxo n8n `n8n/leads-backoffice.json` copia a aba para a tabela `ia_agendamentos` a cada 5 minutos
+  (SQL em `sql/003_agendamentos.sql`); status e corretor editados na planilha aparecem no backoffice no proximo ciclo.
+- **Retomada automatica:** o fluxo `n8n/retomada.json` (SQL em `sql/002_retomada.sql`) manda "posso ajudar em mais
+  alguma coisa?" quando o cliente fica 20 minutos sem responder e encerra com educacao 20 minutos depois, sempre
+  dentro da janela de 24 horas da Meta. As mensagens aparecem na conversa como da Ana.
+
 ## Instalacao
 
 1. **Banco:** rodar `sql/001_conversas.sql` no SQL Editor do projeto Supabase. Pode rodar de novo sem estragar.
