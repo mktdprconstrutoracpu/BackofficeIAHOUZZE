@@ -23,6 +23,10 @@ Rodar `sql/004_atendimento.sql` no SQL Editor do Supabase (projeto da Houzze). P
 Ele cria as colunas de atendimento, a fila `ia_envios`, a tabela `ia_eventos`, as visoes do painel e as regras de
 acesso por papel. No fim, libera `lucas@hotmail.com` como gerente e promove `imobiliariahouzze@gmail.com` a gerente.
 
+Depois, `sql/005_telefone.sql`: a planilha de leads grava o telefone como a Ana escreve (sem o 55) e o WhatsApp manda
+com o DDI; o 005 faz lead e conversa casarem pelos ultimos 11 digitos (ficha do lead, etiqueta "agendado", quem ve o
+que na agenda). Sem ele, a ficha fica vazia e a etiqueta nao acende.
+
 Para cadastrar corretores (o WhatsApp e opcional, serve para os avisos):
 
 ```sql

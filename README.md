@@ -30,8 +30,8 @@ aplicativo do WhatsApp; aqui elas aparecem com o numero do cliente, o nome do pe
   dentro da janela de 24 horas da Meta. As mensagens aparecem na conversa como da Ana.
 ## Instalacao
 
-1. **Banco:** rodar `sql/001_conversas.sql`, `002`, `003` e `004` (nessa ordem) no SQL Editor do projeto Supabase.
-   Podem rodar de novo sem estragar.
+1. **Banco:** rodar `sql/001_conversas.sql`, `002`, `003`, `004` e `005` (nessa ordem) no SQL Editor do projeto
+   Supabase. Podem rodar de novo sem estragar.
 2. **n8n:** criar a credencial "Supabase API" (host do projeto + chave `service_role`) e colar os dois nos de
    `n8n/nos-gravar-conversa.json` no fluxo da Ana, ligando `Dados -> Gravar mensagem do cliente` e
    `Agente Houzze -> Gravar resposta da Ana`. Depois, a checagem de pausa (`n8n/ana-pausa.json`) e o fluxo
