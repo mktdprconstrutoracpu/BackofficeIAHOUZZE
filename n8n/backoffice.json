@@ -1,0 +1,1116 @@
+{
+  "name": "Houzze - Backoffice",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "houzze-backoffice",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b0ff1ce0-0001-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Webhook do Supabase",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        240
+      ],
+      "webhookId": "houzze-backoffice-0001",
+      "notes": "Recebe os Database Webhooks do Supabase (INSERT em ia_envios e em ia_eventos). Ao importar, escolha a credencial \"Header Auth\" com o nome x-houzze-segredo e um valor longo; o mesmo par vai no cabecalho dos dois webhooks no Supabase."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "t1",
+                    "leftValue": "={{ $json.body.table }}",
+                    "rightValue": "ia_envios",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "envio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "t2",
+                    "leftValue": "={{ $json.body.table }}",
+                    "rightValue": "ia_eventos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "evento"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0002-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Qual tabela?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "id",
+              "value": "={{ $json.body.record.id }}",
+              "type": "number"
+            },
+            {
+              "id": "e2",
+              "name": "telefone",
+              "value": "={{ $json.body.record.telefone }}",
+              "type": "string"
+            },
+            {
+              "id": "e3",
+              "name": "texto",
+              "value": "={{ $json.body.record.texto }}",
+              "type": "string"
+            },
+            {
+              "id": "e4",
+              "name": "por_email",
+              "value": "={{ $json.body.record.por_email }}",
+              "type": "string"
+            },
+            {
+              "id": "e5",
+              "name": "por_nome",
+              "value": "={{ $json.body.record.por_nome || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0003-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Envio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1346907115179061",
+        "recipientPhoneNumber": "={{ $json.telefone }}",
+        "textBody": "={{ $json.texto }}",
+        "additionalFields": {}
+      },
+      "id": "b0ff1ce0-0004-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Enviar pelo número oficial",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "6d83fdWCZamlcroQ",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "A mensagem do corretor sai pelo mesmo numero da Ana. Se a Meta recusar (cliente ha mais de 24 h sem escrever, numero invalido), cai na saida de erro e o backoffice mostra o motivo."
+    },
+    {
+      "parameters": {
+        "tableId": "ia_mensagens",
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Envio').item.json.telefone }}"
+            },
+            {
+              "fieldId": "direcao",
+              "fieldValue": "corretor"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "text"
+            },
+            {
+              "fieldId": "texto",
+              "fieldValue": "={{ $('Envio').item.json.texto }}"
+            },
+            {
+              "fieldId": "autor_email",
+              "fieldValue": "={{ $('Envio').item.json.por_email }}"
+            },
+            {
+              "fieldId": "wa_id",
+              "fieldValue": "={{ $json.messages?.[0]?.id || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0005-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Gravar no histórico",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -80
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Entra em ia_mensagens como direcao corretor; o gatilho do banco pausa a Ana nessa conversa e marca quem assumiu."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_envios",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Envio').item.json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "enviado"
+            },
+            {
+              "fieldId": "enviado_em",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "wa_id",
+              "fieldValue": "={{ $('Enviar pelo número oficial').item.json.messages?.[0]?.id || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0006-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Marcar como enviado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -80
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_envios",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Envio').item.json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "erro"
+            },
+            {
+              "fieldId": "erro",
+              "fieldValue": "={{ String($json.error?.message || $json.error?.description || JSON.stringify($json.error || $json)).slice(0, 500) }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0007-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Marcar erro",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        120
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v1",
+              "name": "id",
+              "value": "={{ $json.body.record.id }}",
+              "type": "number"
+            },
+            {
+              "id": "v2",
+              "name": "tipo",
+              "value": "={{ $json.body.record.tipo }}",
+              "type": "string"
+            },
+            {
+              "id": "v3",
+              "name": "telefone",
+              "value": "={{ $json.body.record.telefone || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "v4",
+              "name": "dados",
+              "value": "={{ $json.body.record.dados }}",
+              "type": "object"
+            },
+            {
+              "id": "v5",
+              "name": "whatsapp_padrao",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0008-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Evento",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        480
+      ],
+      "notes": "whatsapp_padrao: numero (so digitos, com 55) que recebe os avisos quando nenhum corretor ou gerente tem WhatsApp cadastrado em ia_liberacoes. Pode ficar vazio."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "q1",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "agendamento_atualizado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "planilha"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "q2",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "^(novo_agendamento|pediu_humano)$",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "aviso"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0009-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Que evento?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// O que a equipe mexeu no backoffice vira linha da aba Leads (as mesmas colunas que a Ana escreve).\nconst d = $('Evento').first().json.dados || {};\nfunction dataBr(iso) { const m = String(iso || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }\nconst status = d.status_corretor || '';\nreturn [{ json: {\n  chave: d.chave || '',\n  data_hora: d.data_hora_texto || '',\n  status: status + (d.observacao ? ' - ' + String(d.observacao).replace(/\\s+/g, ' ').trim().slice(0, 80) : ''),\n  visita_dia: dataBr(d.visita_dia),\n  visita_periodo: d.visita_periodo || ''\n} }];"
+      },
+      "id": "b0ff1ce0-0010-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Preparar linha da planilha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        360
+      ],
+      "notes": "Traduz o que a equipe mexeu no backoffice para as colunas da aba Leads: status (com a observacao), visita_dia em dd/MM/yyyy e visita_periodo."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cPm6ESWgewvkF_Kwt5zkiCUv7f6DUEsj3aFwFLleYP0",
+          "mode": "list",
+          "cachedResultName": "Houzze - Caucaia II",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cPm6ESWgewvkF_Kwt5zkiCUv7f6DUEsj3aFwFLleYP0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data_hora": "={{ $json.data_hora }}",
+            "status": "={{ $json.status }}",
+            "visita_dia": "={{ $json.visita_dia }}",
+            "visita_periodo": "={{ $json.visita_periodo }}"
+          },
+          "matchingColumns": [
+            "data_hora"
+          ],
+          "schema": [
+            {
+              "id": "data_hora",
+              "displayName": "data_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interesse",
+              "displayName": "interesse",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "renda_informada",
+              "displayName": "renda_informada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "unidade_interesse",
+              "displayName": "unidade_interesse",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visita_dia",
+              "displayName": "visita_dia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visita_periodo",
+              "displayName": "visita_periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "resumo",
+              "displayName": "resumo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "corretor",
+              "displayName": "corretor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "origem",
+              "displayName": "origem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0011-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Atualizar aba Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        360
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NaIl7W77gVMJd0Uc",
+          "name": "Google Sheets - Houzze"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Acha a linha pela coluna data_hora (a mesma que a Ana escreveu ao registrar o lead) e troca status, visita_dia e visita_periodo."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_agendamentos",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "chave",
+              "condition": "eq",
+              "keyValue": "={{ $('Preparar linha da planilha').item.json.chave }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "sincronizado_em",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0012-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Marcar sincronizado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        360
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_eventos",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Evento').item.json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "tratado_em",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "resultado",
+              "fieldValue": "={{ $('Atualizar aba Leads').item.json.error ? 'planilha nao atualizada: ' + String($('Atualizar aba Leads').item.json.error.message || $('Atualizar aba Leads').item.json.error).slice(0, 300) : 'planilha atualizada' }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0013-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Evento tratado (planilha)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        360
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ia_liberacoes",
+        "returnAll": true
+      },
+      "id": "b0ff1ce0-0014-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Quem pode receber",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        600
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "notes": "Lista ia_liberacoes (nome, e-mail, papel, whatsapp) para decidir quem recebe o aviso."
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ia_conversas",
+        "returnAll": false,
+        "limit": 1,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $('Evento').first().json.telefone }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0015-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Conversa do cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        600
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "notes": "Para saber se algum corretor ja assumiu a conversa (corretor_email): o aviso vai para ele."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide quem recebe o aviso e monta os parametros do modelo (template) da Meta.\n// Ordem: o corretor que assumiu a conversa (se tiver WhatsApp em ia_liberacoes) > gerentes com WhatsApp > whatsapp_padrao do no \"Evento\".\nconst ev = $('Evento').first().json;\nconst d = ev.dados || {};\nconst pessoas = $('Quem pode receber').all().map(i => i.json).filter(p => p && p.email);\nconst conversa = ($('Conversa do cliente').first() || {}).json || {};\nconst digitos = v => String(v || '').replace(/\\D/g, '');\nconst limpo = (v, max) => String(v == null ? '' : v).replace(/\\s+/g, ' ').trim().slice(0, max) || '-';\nfunction fmtTel(t) { const s = digitos(t); return s.length === 13 && s.startsWith('55') ? '(' + s.slice(2, 4) + ') ' + s.slice(4, 9) + '-' + s.slice(9) : (s ? '+' + s : '-'); }\nfunction dataBr(iso) { const m = String(iso || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }\nlet destinos = [];\nconst dono = conversa.corretor_email ? pessoas.find(p => String(p.email).toLowerCase() === String(conversa.corretor_email).toLowerCase()) : null;\nif (dono && digitos(dono.whatsapp)) destinos = [digitos(dono.whatsapp)];\nif (!destinos.length) destinos = pessoas.filter(p => p.papel === 'gerente' && digitos(p.whatsapp)).map(p => digitos(p.whatsapp));\nif (!destinos.length && digitos(ev.whatsapp_padrao)) destinos = [digitos(ev.whatsapp_padrao)];\ndestinos = [...new Set(destinos)];\nif (!destinos.length) return [{ json: { to: '', motivo: 'sem destinatario: cadastre o whatsapp em ia_liberacoes ou preencha whatsapp_padrao no no Evento' } }];\nlet modelo, parametros;\nif (ev.tipo === 'pediu_humano') {\n  modelo = 'houzze_pediu_humano';\n  parametros = [limpo(d.nome || conversa.nome_whatsapp, 60), fmtTel(d.telefone || ev.telefone), limpo(d.ultima_mensagem, 200)];\n} else {\n  modelo = 'houzze_novo_lead';\n  const visita = d.visita_dia ? dataBr(d.visita_dia) + (d.visita_periodo ? ' de ' + d.visita_periodo : '') : 'sem visita marcada';\n  parametros = [limpo(d.nome, 60), fmtTel(d.telefone || ev.telefone), limpo([d.interesse, d.unidade ? 'unidade ' + d.unidade : ''].filter(Boolean).join(', '), 80), limpo(visita, 60)];\n}\nreturn destinos.map(to => ({ json: { to, modelo, parametros, tipo: ev.tipo } }));"
+      },
+      "id": "b0ff1ce0-0016-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Montar aviso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        600
+      ],
+      "notes": "Um item por destinatario, com o nome do modelo (houzze_novo_lead ou houzze_pediu_humano) e os parametros ja limpos (sem quebra de linha, tamanho limitado)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1",
+              "leftValue": "={{ $json.to }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b0ff1ce0-0017-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Tem para quem avisar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/1346907115179061/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.to, type: 'template', template: { name: $json.modelo, language: { code: 'pt_BR' }, components: [{ type: 'body', parameters: $json.parametros.map(t => ({ type: 'text', text: t })) }] } }) }}",
+        "options": {}
+      },
+      "id": "b0ff1ce0-0018-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Enviar aviso (modelo aprovado)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        520
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "6d83fdWCZamlcroQ",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Mensagem de modelo (template) porque o corretor nao esta na janela de 24 h. Os modelos houzze_novo_lead (4 variaveis) e houzze_pediu_humano (3 variaveis) precisam estar aprovados na Meta; o texto deles esta em ATENDIMENTO.md."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_eventos",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Evento').first().json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "tratado_em",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "resultado",
+              "fieldValue": "={{ $json.messages ? 'aviso enviado para ' + $('Montar aviso').all().map(i => i.json.to).join(', ') : 'erro no aviso: ' + String($json.error?.message || JSON.stringify($json.error || $json)).slice(0, 300) }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0019-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Evento tratado (aviso)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        520
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ia_eventos",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Evento').first().json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "tratado_em",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "resultado",
+              "fieldValue": "={{ $json.motivo }}"
+            }
+          ]
+        }
+      },
+      "id": "b0ff1ce0-0020-4a1b-9c2d-0e1f2a3b4c5d",
+      "name": "Evento tratado (sem destinatário)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        720
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "78SMvtz6Dg81Ounq",
+          "name": "Supabase Houzze"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "executeOnce": true
+    }
+  ],
+  "connections": {
+    "Webhook do Supabase": {
+      "main": [
+        [
+          {
+            "node": "Qual tabela?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qual tabela?": {
+      "main": [
+        [
+          {
+            "node": "Envio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envio": {
+      "main": [
+        [
+          {
+            "node": "Enviar pelo número oficial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar pelo número oficial": {
+      "main": [
+        [
+          {
+            "node": "Gravar no histórico",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar no histórico": {
+      "main": [
+        [
+          {
+            "node": "Marcar como enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento": {
+      "main": [
+        [
+          {
+            "node": "Que evento?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Que evento?": {
+      "main": [
+        [
+          {
+            "node": "Preparar linha da planilha",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quem pode receber",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar linha da planilha": {
+      "main": [
+        [
+          {
+            "node": "Atualizar aba Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar aba Leads": {
+      "main": [
+        [
+          {
+            "node": "Marcar sincronizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar sincronizado": {
+      "main": [
+        [
+          {
+            "node": "Evento tratado (planilha)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quem pode receber": {
+      "main": [
+        [
+          {
+            "node": "Conversa do cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversa do cliente": {
+      "main": [
+        [
+          {
+            "node": "Montar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar aviso": {
+      "main": [
+        [
+          {
+            "node": "Tem para quem avisar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem para quem avisar?": {
+      "main": [
+        [
+          {
+            "node": "Enviar aviso (modelo aprovado)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evento tratado (sem destinatário)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar aviso (modelo aprovado)": {
+      "main": [
+        [
+          {
+            "node": "Evento tratado (aviso)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,111 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ia_conversas",
+        "returnAll": false,
+        "limit": 1,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $json.telefone }}"
+            }
+          ]
+        }
+      },
+      "id": "e1f2a3b4-0010-4c5d-8e9f-0a1b2c3d0010",
+      "name": "Conversa no backoffice",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        64
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Le a linha da conversa em ia_conversas para saber se a equipe pausou a Ana. Sem linha (cliente novo) ou com erro, segue em frente e a Ana responde."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "p1",
+              "leftValue": "={{ $json.pausada === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-0011-4c5d-8e9f-0a1b2c3d0011",
+      "name": "Ana em pausa?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        64
+      ],
+      "notes": "Verdadeiro: alguem da equipe assumiu esta conversa pelo backoffice. A mensagem do cliente ja foi gravada e a Ana fica quieta. Falso: segue para a Ana."
+    }
+  ],
+  "connections": {
+    "Dados": {
+      "main": [
+        [
+          {
+            "node": "Gravar mensagem do cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversa no backoffice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversa no backoffice": {
+      "main": [
+        [
+          {
+            "node": "Ana em pausa?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ana em pausa?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Esperar 15 segundos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nota": "Entra entre \"Dados\" e \"Esperar 15 segundos\" no fluxo da Ana. O no \"Visto e digitando\" passa a usar message_id: $('Dados').first().json.message_id."
+}
