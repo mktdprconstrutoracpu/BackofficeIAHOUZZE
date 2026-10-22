@@ -27,19 +27,8 @@ language sql stable security definer set search_path = public as $$
   select l.papel from public.ia_liberacoes l where lower(l.email) = public.ia_email() limit 1
 $$;
 
--- gerente ve tudo; corretor ve as conversas sem dono e as que assumiu
-create or replace function public.ia_ve_conversa(p_telefone text) returns boolean
-language sql stable security definer set search_path = public as $$
-  select case
-    when not public.ia_tem_acesso() then false
-    when public.ia_papel() = 'gerente' then true
-    else exists (
-      select 1 from public.ia_conversas c
-      where c.telefone = p_telefone
-        and (c.corretor_email is null or lower(c.corretor_email) = public.ia_email())
-    )
-  end
-$$;
+-- (a funcao ia_ve_conversa esta logo depois da parte 2: ela le corretor_email, que e criada la,
+--  e o Postgres confere o corpo de uma funcao em SQL na hora de criar)
 
 -- ============================================================ 2. estado da conversa
 alter table public.ia_conversas
@@ -59,6 +48,22 @@ alter table public.ia_conversas
 alter table public.ia_conversas drop constraint if exists ia_conversas_etiqueta_check;
 alter table public.ia_conversas add constraint ia_conversas_etiqueta_check
   check (etiqueta is null or etiqueta in ('novo', 'quente', 'morno', 'frio', 'agendado', 'perdido', 'pediu humano', 'fechado'));
+
+-- gerente ve tudo; corretor ve as conversas sem dono e as que assumiu
+-- (fica depois das colunas novas de ia_conversas: a 1a versao deste arquivo a criava na parte 1 e caia em
+--  "column c.corretor_email does not exist", porque o corpo de funcao em SQL e conferido na criacao)
+create or replace function public.ia_ve_conversa(p_telefone text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select case
+    when not public.ia_tem_acesso() then false
+    when public.ia_papel() = 'gerente' then true
+    else exists (
+      select 1 from public.ia_conversas c
+      where c.telefone = p_telefone
+        and (c.corretor_email is null or lower(c.corretor_email) = public.ia_email())
+    )
+  end
+$$;
 
 -- ============================================================ 3. mensagens do corretor
 alter table public.ia_mensagens drop constraint if exists ia_mensagens_direcao_check;
