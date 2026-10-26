@@ -386,6 +386,18 @@ a.botao { text-decoration: none; }
 .balao .tipo { display: inline-flex; align-items: center; gap: 6px; font-style: italic; opacity: 0.8; }
 .balao .foto-link { display: block; margin: 2px 0; }
 .balao .foto { display: block; width: 280px; max-width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: rgba(0, 0, 0, 0.18); }
+/* documento (foto ou PDF) que o cliente mandou: fica no cofre privado, abre por link assinado */
+.balao .arquivo { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 220px; margin: 2px 0; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--linha-2); background: rgba(0, 0, 0, 0.14); color: inherit; font: inherit; text-align: left; cursor: pointer; white-space: normal; }
+.balao .arquivo:hover { border-color: var(--ceu); }
+.balao .arquivo .glifo { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; flex: none; background: rgba(141, 185, 236, 0.14); color: var(--ceu); }
+.balao .arquivo .glifo svg { width: 18px; height: 18px; }
+.balao .arquivo b { display: block; font-size: 13px; line-height: 1.3; }
+.balao .arquivo small { display: block; font-size: 11px; opacity: 0.7; }
+.balao .arquivo.com-foto { flex-direction: column; align-items: stretch; gap: 8px; width: 280px; max-width: 100%; }
+.balao .arquivo .arquivo-linha { display: flex; align-items: center; gap: 10px; }
+.balao .doc-miniatura-caixa { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: rgba(0, 0, 0, 0.22); }
+.balao .doc-miniatura { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.25s; }
+.balao .doc-miniatura[src] { opacity: 1; }
 .enviar { grid-column: 1; grid-row: 3; display: flex; gap: 10px; align-items: flex-end; padding: 12px 16px 14px; border-top: 1px solid var(--linha); background: rgba(17, 28, 48, 0.6); }
 .enviar textarea { flex: 1; min-height: 44px; max-height: 160px; resize: none; background: rgba(11, 19, 34, 0.7); border: 1px solid var(--linha-2); border-radius: 16px; padding: 11px 14px; outline: none; line-height: 1.45; }
 .enviar textarea:focus { border-color: var(--ceu); box-shadow: 0 0 0 4px rgba(141, 185, 236, 0.16); }
@@ -409,6 +421,35 @@ a.botao { text-decoration: none; }
 .ficha textarea:focus { border-color: var(--ceu); }
 .ficha .botao { margin-top: 8px; }
 .ficha-vazia { font-size: 13px; color: var(--texto-3); }
+/* documentos da pre analise */
+.docs-resumo { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--texto-2); margin-bottom: 6px; }
+.docs-resumo b { font-size: 15px; color: var(--texto); font-variant-numeric: tabular-nums; }
+.docs-barra { height: 6px; border-radius: 999px; background: rgba(11, 19, 34, 0.7); overflow: hidden; margin-bottom: 10px; }
+.docs-barra i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--ceu-2), var(--ceu)); transition: width 0.3s ease; }
+.docs-barra.completo i { background: var(--ok); }
+.docs { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.docs li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px 8px; align-items: start; font-size: 13px; padding: 7px 8px; border-radius: 8px; background: rgba(11, 19, 34, 0.45); border: 1px solid transparent; }
+.docs li > i { margin-top: 1px; }
+.docs li.falta .doc-acoes { display: none; }
+.docs li.falta { color: var(--texto-3); }
+.docs li.recebido { border-color: rgba(141, 185, 236, 0.3); }
+.docs li.conferido { border-color: rgba(90, 211, 154, 0.35); }
+.docs li.recusado { border-color: rgba(240, 138, 138, 0.4); }
+.docs li > i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--linha-2); display: grid; place-items: center; font-style: normal; font-size: 11px; color: #0B1322; }
+.docs li.recebido > i { background: var(--ceu); border-color: var(--ceu); }
+.docs li.conferido > i { background: var(--ok); border-color: var(--ok); }
+.docs li.recusado > i { background: var(--erro); border-color: var(--erro); }
+.docs .doc-nome { overflow-wrap: anywhere; }
+.docs .doc-nome small { display: block; font-size: 11px; color: var(--texto-3); }
+.docs .doc-acoes { grid-column: 2; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.docs .doc-acoes button { border: 1px solid var(--linha-2); background: transparent; color: var(--texto-2); font: inherit; font-size: 11.5px; font-weight: 600; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
+.docs .doc-acoes button:hover { border-color: var(--ceu); color: var(--ceu-2); }
+.docs .doc-acoes button[aria-pressed="true"] { background: rgba(90, 211, 154, 0.16); border-color: var(--ok); color: var(--ok); }
+.docs .doc-acoes select { font: inherit; font-size: 11.5px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--linha-2); background: rgba(11, 19, 34, 0.7); color: var(--texto); max-width: 150px; }
+.docs-outros { margin-top: 10px; }
+.docs-outros .olho { margin-bottom: 6px; }
+.ag-chips span.docs { background: rgba(141, 185, 236, 0.18); color: var(--texto); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ag-chips span.docs.completo { background: rgba(90, 211, 154, 0.18); color: var(--ok); }
 .ficha select { width: 100%; }
 
 /* painel de numeros */
@@ -716,6 +757,10 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
             <div id="fichaLead"></div>
           </div>
           <div class="ficha-bloco">
+            <span class="olho">Documentos para a pré análise</span>
+            <div id="fichaDocs"></div>
+          </div>
+          <div class="ficha-bloco">
             <span class="olho">Notas da equipe</span>
             <label class="sr" for="notas">Notas da equipe sobre este cliente</label>
             <textarea id="notas" placeholder="Anotações internas: o que combinou, preferências, próximos passos..."></textarea>
@@ -775,6 +820,10 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
   var FUSO = 'America/Sao_Paulo';
   var POLL_MS = 45000;
   var ETIQUETAS = ['novo', 'quente', 'morno', 'frio', 'agendado', 'pediu humano', 'perdido', 'fechado'];
+  // os seis documentos da pre analise, na ordem em que a Ana pede (a mesma lista de ia_documentos_exigidos() no banco)
+  var DOC_TIPOS = [['cnh_rg', 'CNH ou RG'], ['comprovante_residencia', 'Comprovante de residência'], ['imposto_renda', 'Declaração de imposto de renda'], ['certidao_nascimento', 'Certidão de nascimento ou casamento'], ['renda', 'Comprovante de renda formal'], ['extrato', 'Extrato bancário dos últimos 6 meses']];
+  var DOC_NOME = {}; DOC_TIPOS.forEach(function (t) { DOC_NOME[t[0]] = t[1]; });
+  var DOC_BUCKET = 'documentos';
 
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -790,6 +839,8 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     aberta: null,           // telefone da conversa aberta
     mensagens: [],          // linhas de ia_mensagens da conversa aberta
     envios: [],             // envios pendentes/erro da conversa aberta
+    documentos: [],         // linhas de ia_documentos da conversa aberta
+    docsResumo: {},         // ia_documentos_resumo por telefone (11 digitos): contador "docs N/6" na agenda
     filtro: 'todas',
     etiquetaFiltro: '',
     busca: '',
@@ -852,6 +903,12 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var FOTO_URL = /^https?:\/\/\S+\.(?:jpe?g|png|webp|gif)$/i;
   function ehFoto(tipo, texto) { return tipo === 'image' && FOTO_URL.test(texto || ''); }
+  // caminho de um arquivo no cofre: <telefone>/<timestamp>-<tipo>.<ext> (e o que o n8n grava em ia_mensagens.texto)
+  var CAMINHO_COFRE = /^\d{8,15}\/\d{10,}-([a-z_]+)\.(jpe?g|png|webp|pdf)$/i;
+  function arquivoDoCaminho(texto) {
+    var m = CAMINHO_COFRE.exec(texto || '');
+    return m ? { caminho: texto, tipo: m[1], pdf: /pdf/i.test(m[2]) } : null;
+  }
   function toast(msg) {
     var t = $('toast'); t.textContent = msg; t.classList.add('ver');
     clearTimeout(toast.r); toast.r = setTimeout(function () { t.classList.remove('ver'); }, 2600);
@@ -958,6 +1015,16 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     estado.agendamentos = r.data || [];
     renderAgenda();
     if (estado.aberta) renderFicha();
+    carregarDocsResumo();
+  }
+  async function carregarDocsResumo() {
+    if (estado.semBanco) return;
+    var r = await sb.from('ia_documentos_resumo').select('*');
+    if (r.error) { console.warn('documentos', r.error.message); return; }
+    var mapa = {};
+    (r.data || []).forEach(function (d) { mapa[tel11(d.telefone)] = d; });
+    estado.docsResumo = mapa;
+    renderAgenda();
   }
   function hojeStr() { return diaDe(new Date()); }
   function fmtDiaAgenda(iso) {
@@ -997,6 +1064,8 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     if (a.unidade_interesse) chips.push('<span>unidade ' + esc(a.unidade_interesse) + '</span>');
     if (a.renda_informada) chips.push('<span>renda ' + esc(a.renda_informada) + '</span>');
     if (a.corretor) chips.push('<span>corretor: ' + esc(a.corretor) + '</span>');
+    var docs = estado.docsResumo[tel11(a.telefone)];
+    if (docs) chips.push('<span class="docs' + (Number(docs.tipos_recebidos) >= DOC_TIPOS.length ? ' completo' : '') + '" title="Documentos da pré análise recebidos">docs ' + Number(docs.tipos_recebidos || 0) + '/' + DOC_TIPOS.length + (Number(docs.sem_tipo) ? ' +' + docs.sem_tipo + ' sem tipo' : '') + '</span>');
     var conversa = estado.conversas.find(function (c) { return mesmoTel(c.telefone, a.telefone); });
     return '<article class="ag-cartao' + (passado ? ' passado' : '') + (cls === 'cancelado' ? ' cancelado' : '') + '" data-chave="' + esc(a.chave) + '">' + data +
       '<div class="ag-corpo"><div class="ag-topo"><span class="ag-nome">' + esc(a.nome || fmtTel(a.telefone) || 'Sem nome') + '</span>' +
@@ -1217,12 +1286,14 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     app.classList.add('aberta');
     renderLista();
     var c = conversaAberta() || { telefone: telefone };
+    estado.documentos = [];
     renderCabecaThread(c);
     renderFicha();
     $('threadVazio').hidden = true;
     $('threadConteudo').hidden = false;
     $('thread').classList.remove('sem-ficha');
     $('mensagens').innerHTML = '<div class="vazio"><span class="carregando"></span></div>';
+    carregarDocumentos(telefone);
     var r = await sb.from('ia_mensagens').select('*').eq('telefone', telefone).order('criada_em', { ascending: true }).limit(2000);
     var e = await sb.from('ia_envios').select('*').eq('telefone', telefone).neq('status', 'enviado').order('criado_em', { ascending: true }).limit(50);
     if (estado.aberta !== telefone) return;
@@ -1258,7 +1329,8 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     ul.innerHTML = lista.map(function (c) {
       var tom = tomDe(c.telefone);
       var nome = c.nome_whatsapp || fmtTel(c.telefone);
-      var ultima = FOTO_URL.test(c.ultima_mensagem || '') ? 'Foto' : (c.ultima_mensagem || '');
+      var arq = arquivoDoCaminho(c.ultima_mensagem);
+      var ultima = FOTO_URL.test(c.ultima_mensagem || '') ? 'Foto' : arq ? 'Documento: ' + (DOC_NOME[arq.tipo] || 'a identificar') : (c.ultima_mensagem || '');
       var quem = c.ultima_direcao === 'ana' ? '<em>Ana:</em> ' : c.ultima_direcao === 'corretor' ? '<em class="corretor">Equipe:</em> ' : '';
       return '<li><button class="conversa" type="button" data-tel="' + esc(c.telefone) + '" aria-current="' + (c.telefone === estado.aberta) + '">' +
         '<span class="avatar' + (c.pausada ? ' pausada' : '') + '" style="--a1:' + tom[0] + ';--a2:' + tom[1] + '" title="' + (c.pausada ? 'Ana em pausa' : '') + '">' + esc(iniciais(c.nome_whatsapp, c.telefone)) + '</span>' +
@@ -1314,14 +1386,120 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
         (L.chave ? '<button class="botao vazio pequeno" type="button" data-visita="' + esc(L.chave) + '">' + (L.visita_dia ? 'Confirmar / remarcar' : 'Marcar visita') + '</button>' : '');
     }
     if (document.activeElement !== $('notas')) $('notas').value = c.notas || '';
+    renderDocs();
   }
   $('fichaLead').addEventListener('click', function (ev) { var v = ev.target.closest('[data-visita]'); if (v) abrirDialogoVisita(v.getAttribute('data-visita')); });
+
+  /* ---------------- documentos da pre analise ---------------- */
+  async function carregarDocumentos(telefone) {
+    if (estado.semBanco) return;
+    var r = await sb.from('ia_documentos').select('*').like('telefone', '%' + tel11(telefone)).order('recebido_em', { ascending: true }).limit(200);
+    if (r.error || estado.aberta !== telefone) { if (r.error) console.warn('documentos', r.error.message); return; }
+    estado.documentos = r.data || [];
+    renderDocs();
+  }
+  function renderDocs() {
+    var box = $('fichaDocs'); if (!box) return;
+    var docs = estado.documentos || [];
+    var porTipo = {};
+    docs.forEach(function (d) { (porTipo[d.tipo] = porTipo[d.tipo] || []).push(d); });
+    var recebidos = DOC_TIPOS.filter(function (t) { return porTipo[t[0]]; }).length;
+    var completo = recebidos >= DOC_TIPOS.length;
+    var html = '<div class="docs-resumo"><span><b>' + recebidos + '</b> de ' + DOC_TIPOS.length + (completo ? ' · completo' : '') + '</span><span>' + (docs.length ? docs.length + (docs.length === 1 ? ' arquivo' : ' arquivos') : 'nada recebido ainda') + '</span></div>' +
+      '<div class="docs-barra' + (completo ? ' completo' : '') + '"><i style="width:' + Math.round(100 * recebidos / DOC_TIPOS.length) + '%"></i></div><ul class="docs">';
+    DOC_TIPOS.forEach(function (t) {
+      var lista = porTipo[t[0]] || [];
+      if (!lista.length) { html += '<li class="falta"><i></i><span class="doc-nome">' + esc(t[1]) + '</span><span class="doc-acoes"></span></li>'; return; }
+      var st = lista.every(function (d) { return d.status === 'conferido'; }) ? 'conferido' : lista.some(function (d) { return d.status === 'recusado'; }) ? 'recusado' : 'recebido';
+      var ultimo = lista[lista.length - 1];
+      html += '<li class="' + st + '"><i>' + (st === 'conferido' ? '&#10003;' : '') + '</i><span class="doc-nome">' + esc(t[1]) +
+        '<small>' + esc(fmtDataHora(ultimo.recebido_em)) + (lista.length > 1 ? ' · ' + lista.length + ' arquivos' : '') + (st === 'conferido' && ultimo.conferido_por ? ' · conferido por ' + esc(nomeDe(ultimo.conferido_por)) : '') + (st === 'recusado' ? ' · recusado' + (ultimo.observacao ? ': ' + esc(ultimo.observacao) : '') : '') + '</small></span>' +
+        '<span class="doc-acoes">' + lista.map(function (d, i) { return '<button type="button" data-arquivo="' + esc(d.arquivo) + '" title="Abrir ' + esc(d.nome_original || d.arquivo) + '">Abrir' + (lista.length > 1 ? ' ' + (i + 1) : '') + '</button>'; }).join('') +
+        '<button type="button" data-conferir="' + esc(t[0]) + '" aria-pressed="' + (st === 'conferido') + '" title="' + (st === 'conferido' ? 'Desfazer a conferência' : 'Marcar como conferido') + '">' + (st === 'conferido' ? 'Conferido' : 'Conferir') + '</button>' +
+        (st !== 'recusado' ? '<button type="button" data-recusar="' + esc(t[0]) + '" title="Pedir de novo (arquivo ilegível ou errado)">Recusar</button>' : '') +
+        '</span></li>';
+    });
+    html += '</ul>';
+    var outros = porTipo.outro || [];
+    if (outros.length) {
+      html += '<div class="docs-outros"><span class="olho">Sem tipo (a pessoa não disse o que é)</span><ul class="docs">' + outros.map(function (d) {
+        return '<li class="recebido"><i></i><span class="doc-nome">' + esc(d.nome_original || (/pdf/i.test(d.mime || '') ? 'PDF' : 'Foto')) + '<small>' + esc(fmtDataHora(d.recebido_em)) + (d.legenda ? ' · "' + esc(d.legenda) + '"' : '') + '</small></span>' +
+          '<span class="doc-acoes"><button type="button" data-arquivo="' + esc(d.arquivo) + '">Abrir</button><label class="sr" for="docTipo' + d.id + '">Qual documento é</label><select id="docTipo' + d.id + '" data-doc-tipo="' + d.id + '"><option value="">É qual?</option>' +
+          DOC_TIPOS.map(function (t) { return '<option value="' + t[0] + '">' + esc(t[1]) + '</option>'; }).join('') + '</select></span></li>';
+      }).join('') + '</ul></div>';
+    }
+    if (!docs.length) html += '<p class="ficha-vazia" style="margin:8px 0 0">A Ana pede os seis quando a pessoa aceita a visita. Cada foto ou PDF que chegar pelo WhatsApp entra aqui na hora.</p>';
+    box.innerHTML = html;
+  }
+  // abre o arquivo do cofre numa aba nova (link assinado, vale 5 minutos). Abre a aba antes do await para o navegador nao bloquear.
+  async function abrirArquivo(caminho) {
+    if (estado.semBanco) { toast('Abriria ' + caminho); return; }
+    var janela = window.open('about:blank', '_blank');
+    var r = await sb.storage.from(DOC_BUCKET).createSignedUrl(caminho, 300);
+    if (r.error || !r.data || !r.data.signedUrl) { if (janela) janela.close(); toast('Não consegui abrir o arquivo: ' + (r.error ? r.error.message : 'sem link')); return; }
+    if (janela) janela.location.href = r.data.signedUrl; else window.open(r.data.signedUrl, '_blank', 'noopener');
+  }
+  async function mexerDocumentos(ids, dados, ok) {
+    if (!ids.length) return;
+    if (!estado.semBanco) {
+      var r = await sb.from('ia_documentos').update(dados).in('id', ids);
+      if (r.error) { toast('Não consegui salvar: ' + r.error.message); return; }
+    }
+    estado.documentos.forEach(function (d) { if (ids.indexOf(d.id) !== -1) Object.keys(dados).forEach(function (k) { d[k] = dados[k]; }); });
+    renderDocs();
+    if (ok) toast(ok);
+    carregarDocsResumo();
+  }
+  $('fichaDocs').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-arquivo')) { abrirArquivo(b.getAttribute('data-arquivo')); return; }
+    var tipo = b.getAttribute('data-conferir') || b.getAttribute('data-recusar'); if (!tipo) return;
+    var ids = estado.documentos.filter(function (d) { return d.tipo === tipo; }).map(function (d) { return d.id; });
+    var eu = estado.usuario ? estado.usuario.email : null;
+    if (b.hasAttribute('data-conferir')) {
+      var desfazer = b.getAttribute('aria-pressed') === 'true';
+      mexerDocumentos(ids, desfazer ? { status: 'recebido', conferido_por: null, conferido_em: null } : { status: 'conferido', conferido_por: eu, conferido_em: new Date().toISOString() }, desfazer ? 'Conferência desfeita' : DOC_NOME[tipo] + ': conferido');
+    } else {
+      var motivo = window.prompt('Por que recusar ' + DOC_NOME[tipo] + '? (ilegível, cortado, vencido...)', '');
+      if (motivo === null) return;
+      mexerDocumentos(ids, { status: 'recusado', observacao: motivo || 'recusado', conferido_por: eu, conferido_em: new Date().toISOString() }, DOC_NOME[tipo] + ': recusado. Peça de novo ao cliente pela conversa.');
+    }
+  });
+  $('fichaDocs').addEventListener('change', function (ev) {
+    var s = ev.target.closest('select[data-doc-tipo]'); if (!s || !s.value) return;
+    var id = Number(s.getAttribute('data-doc-tipo'));
+    mexerDocumentos([id], { tipo: s.value }, 'Arquivo marcado como ' + DOC_NOME[s.value]);
+  });
+  function documentoMudou(p) {
+    var linha = p.new && p.new.telefone ? p.new : p.old;
+    if (estado.aberta && linha && mesmoTel(linha.telefone, estado.aberta)) carregarDocumentos(estado.aberta);
+    carregarDocsResumo();
+  }
   $('fichaToggle').addEventListener('click', function () { $('thread').classList.toggle('ficha-aberta'); });
   $('fichaFechar').addEventListener('click', function () { $('thread').classList.remove('ficha-aberta'); });
 
   function autorDe(m) { return m.direcao === 'corretor' ? '<span class="autor">' + esc(nomeDe(m.autor_email) || 'Equipe') + '</span>' : ''; }
+  function balaoArquivoHTML(arq) {
+    var icone = arq.pdf
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>';
+    // foto: miniatura carregada depois por link assinado (carregarMiniaturas); PDF: so o cartao com Abrir
+    var previa = arq.pdf ? '' : '<span class="doc-miniatura-caixa"><img class="doc-miniatura" data-miniatura="' + esc(arq.caminho) + '" alt=""></span>';
+    return '<button class="arquivo' + (arq.pdf ? '' : ' com-foto') + '" type="button" data-arquivo="' + esc(arq.caminho) + '">' + previa + '<span class="arquivo-linha"><span class="glifo">' + icone + '</span><span><b>' + esc(DOC_NOME[arq.tipo] || 'Documento a identificar') + '</b><small>' + (arq.pdf ? 'PDF' : 'Foto') + ' · guardado no cofre · abrir</small></span></span></button>';
+  }
+  async function carregarMiniaturas() {
+    if (estado.semBanco) return;
+    var imgs = Array.prototype.slice.call($('mensagens').querySelectorAll('img[data-miniatura]:not([src])'));
+    if (!imgs.length) return;
+    var caminhos = imgs.map(function (i) { return i.getAttribute('data-miniatura'); }).filter(function (c, i, a) { return a.indexOf(c) === i; });
+    var r = await sb.storage.from(DOC_BUCKET).createSignedUrls(caminhos, 3600);
+    if (r.error || !r.data) return;
+    var mapa = {}; r.data.forEach(function (x) { if (x.signedUrl) mapa[x.path] = x.signedUrl; });
+    imgs.forEach(function (i) { var u = mapa[i.getAttribute('data-miniatura')]; if (u && document.contains(i)) i.src = u; });
+  }
   function balaoHTML(m) {
-    var corpo = ehFoto(m.tipo, m.texto)
+    var arq = (m.tipo === 'image' || m.tipo === 'document') ? arquivoDoCaminho(m.texto) : null;
+    var corpo = arq ? balaoArquivoHTML(arq) : ehFoto(m.tipo, m.texto)
       ? '<a class="foto-link" href="' + esc(m.texto) + '" target="_blank" rel="noopener"><img class="foto" src="' + esc(m.texto) + '" alt="Foto enviada pela Ana" loading="lazy"></a>'
       : m.tipo && m.tipo !== 'text' && !m.texto
         ? '<span class="tipo">[' + esc(m.tipo) + ']</span>'
@@ -1345,7 +1523,9 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     estado.envios.forEach(function (e) { html += balaoEnvioHTML(e); });
     box.innerHTML = html || '<div class="vazio"><b>Sem mensagens</b></div>';
     box.scrollTop = box.scrollHeight;
+    carregarMiniaturas();
   }
+  $('mensagens').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-arquivo]'); if (b) abrirArquivo(b.getAttribute('data-arquivo')); });
   function anexarMensagem(m) {
     if (estado.mensagens.some(function (x) { return x.id === m.id; })) return;
     var box = $('mensagens');
@@ -1362,6 +1542,7 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     var pend = box.querySelector('[data-envio]');
     if (pend) pend.insertAdjacentHTML('beforebegin', balaoHTML(m)); else box.insertAdjacentHTML('beforeend', balaoHTML(m));
     if (pertoDoFim) box.scrollTop = box.scrollHeight;
+    carregarMiniaturas();
   }
 
   /* ---------------- busca e filtros ---------------- */
@@ -1471,6 +1652,7 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'ia_conversas' }, function (p) { conversaMudou(p.new); })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'ia_envios' }, function (p) { if (p.new.telefone === estado.aberta) envioMudou(p.new); })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ia_agendamentos' }, function () { carregarAgendamentos(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ia_documentos' }, function (p) { documentoMudou(p); })
       .subscribe(function (status) {
         if (status === 'SUBSCRIBED') marcarVivo(true, 'ao vivo');
         else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') marcarVivo(false, 'atualizando a cada 45 s');
@@ -1500,6 +1682,7 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     if (r.error || estado.aberta !== tel) return;
     var mudou = (r.data || []).length !== estado.mensagens.length || (e.data || []).length !== estado.envios.length;
     if (mudou) { estado.mensagens = r.data; estado.envios = e.data || []; renderMensagens(); }
+    carregarDocumentos(tel);
   }
   function conversaMudou(nova) {
     var c = estado.conversas.find(function (x) { return x.telefone === nova.telefone; });
@@ -1534,6 +1717,7 @@ dialog .sub { margin: 0 0 16px; color: var(--texto-2); font-size: 13px; }
     abrirLocal: function (telefone) { estado.aberta = telefone; app.classList.add('aberta'); var c = conversaAberta() || { telefone: telefone }; renderCabecaThread(c); renderFicha(); $('threadVazio').hidden = true; $('threadConteudo').hidden = false; $('thread').classList.remove('sem-ficha'); renderLista(); },
     mostrarPainel: function (dias, horas) { estado.metricasDia = dias; estado.metricasHora = horas; renderPainel(); },
     mostrarNaoResolvidas: function (lista) { estado.naoResolvidas = lista; renderNaoResolvidas(); },
+    mostrarDocumentos: function (lista, resumo) { estado.documentos = lista || []; if (resumo) { estado.docsResumo = {}; resumo.forEach(function (d) { estado.docsResumo[tel11(d.telefone)] = d; }); } renderDocs(); renderAgenda(); },
     setUsuario: function (email, nome, papel, liberacoes) { estado.usuario = { email: email }; estado.nome = nome; estado.papel = papel; estado.liberacoes = liberacoes || []; aplicarPapel(); $('quem').innerHTML = esc(nome) + '<span class="papel">' + esc(papel) + '</span>'; },
     modoTeste: function () { estado.semBanco = true; pararAoVivo(); mostrar('app'); },
     mostrarAba: mostrarAba

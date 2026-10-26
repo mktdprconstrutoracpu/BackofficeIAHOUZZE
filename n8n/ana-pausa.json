@@ -99,7 +99,7 @@
         [],
         [
           {
-            "node": "Esperar 15 segundos",
+            "node": "Esperar antes do visto",
             "type": "main",
             "index": 0
           }
@@ -107,5 +107,5 @@
       ]
     }
   },
-  "nota": "Entra entre \"Dados\" e \"Esperar 15 segundos\" no fluxo da Ana. O no \"Visto e digitando\" passa a usar message_id: $('Dados').first().json.message_id."
+  "nota": "Entra entre \"Dados\" e \"Esperar antes do visto\" (antes chamado \"Esperar 15 segundos\") no fluxo da Ana. O no \"Visto e digitando\" passa a usar message_id: $('Dados').first().json.message_id."
 }

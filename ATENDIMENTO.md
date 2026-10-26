@@ -45,16 +45,53 @@ Recomendacao: senha longa, nunca sequencia de numeros; o proprio usuario pode tr
 
 ### 3.1 Fluxo da Ana (pausa)
 
-Importar os dois nos de `n8n/ana-pausa.json` e ligar `Dados -> Conversa no backoffice -> Ana em pausa? -> (falso) Esperar 15 segundos`.
+Importar os dois nos de `n8n/ana-pausa.json` e ligar `Dados -> Conversa no backoffice -> Ana em pausa? -> (falso) Esperar antes do visto`
+(no fluxo anterior esse no se chamava "Esperar 15 segundos"; em 23/10 o tempo total de resposta da Ana passou a 15 s:
+4 s antes do visto e, depois da resposta, so o que faltar para completar 15 s contados da mensagem do cliente).
 A saida "verdadeiro" fica solta: a mensagem do cliente ja foi gravada e a Ana nao responde.
 No no **Visto e digitando**, trocar `message_id: $json.message_id` por `message_id: $('Dados').first().json.message_id`.
 (O fluxo completo ja montado com tudo isso esta em `Downloads/houzze-ana-fluxo-completo.json`, fora do repositorio porque tem o PIN.)
 
-### 3.2 Fluxo novo "Houzze - Backoffice"
+### 3.1b Documentos da pre analise (26/10/2026)
 
-Importar `n8n/backoffice.json`. Ao abrir o no **Webhook do Supabase**, criar uma credencial **Header Auth**:
-nome `x-houzze-segredo`, valor uma frase longa e aleatoria (guardar, vai ser usada no passo 4). Ativar o fluxo e
-copiar a URL de producao do webhook (`https://<seu n8n>/webhook/houzze-backoffice`).
+Antes de fechar o agendamento, a Ana pede seis documentos (CNH ou RG, comprovante de residencia, declaracao de
+imposto de renda, certidao de nascimento ou casamento, comprovante de renda formal e extrato bancario dos ultimos
+6 meses) e a pessoa manda foto ou PDF pelo proprio WhatsApp. Nada disso passa pela IA:
+
+- `WhatsApp Trigger -> Fotos e arquivos` (filtro `type` = image ou document) `-> Dados do arquivo -> Conversa (documento)
+  -> Rotular documento -> Endereco do arquivo na Meta -> Baixar arquivo -> Guardar no cofre -> Registrar documento
+  -> Arquivo na conversa -> Equipe assumiu? -> (falso) O que falta -> Montar confirmacao -> Enviar confirmacao`
+  (+ `Gravar confirmacao`). Os nos estao em `n8n/documentos.json` (sem credenciais); o fluxo completo montado fica em
+  `Downloads/houzze-ana-fluxo-completo.json`.
+- O arquivo vai para o bucket privado `documentos` do Supabase (`<telefone>/<timestamp>-<tipo>.<ext>`), a linha para
+  `ia_documentos` e um balao para a conversa (`ia_mensagens.texto` = caminho no cofre). A pessoa recebe na hora
+  "Recebi a CNH ou RG! Ainda faltam: ...". Se a equipe assumiu a conversa (Ana em pausa), o arquivo e guardado e a
+  confirmacao nao sai.
+- O tipo vem da legenda ("segue o RG"), senao de `ia_conversas.documento_esperado`, senao fica `outro`: a confirmacao
+  pergunta qual documento e, e a Ana reclassifica com a ferramenta `classificar_documento`
+  (`rpc/ia_classificar_ultimo_documento`). A equipe tambem reclassifica pelo backoffice.
+- No fluxo de texto, o no `Documentos da pessoa` (entre `Visto e digitando` e o agente) le a view
+  `ia_documentos_resumo` e o texto do agente ganha "Documentos ja recebidos: ... Ainda faltam: ...", para a Ana nao
+  pedir de novo. A secao "Documentos para a pre analise" do prompt diz quando pedir e que a visita nunca fica presa
+  por documento.
+- Credenciais dos HTTP Request: **WhatsApp account** (predefinida `whatsAppApi`, baixa o arquivo da Meta) e
+  **Supabase Houzze** (predefinida `supabaseApi`, com a chave `service_role`: sobe no cofre e grava as linhas).
+- SQL: `sql/006_documentos.sql` (bucket, tabela, view, funcoes, policies, realtime).
+
+No backoffice: bloco "Documentos para a pre analise" na ficha (N de 6, barra, cada item com Abrir / Conferir /
+Recusar, seletor "E qual?" nos arquivos sem tipo), balao de arquivo na conversa (abre por link assinado de 5 minutos)
+e o chip `docs N/6` nos cartoes da agenda.
+
+### 3.2 Fluxo "Houzze - Backoffice e leads"
+
+`n8n/backoffice.json` e um fluxo unico que **substitui** o "Houzze - Leads para o backoffice": traz os mesmos quatro
+nos da sincronizacao dos leads (mesmo gatilho de 5 minutos) mais o webhook e a varredura da fila. Abrir o fluxo dos
+leads no n8n, menu "..." > **Import from File**, escolher o arquivo: o conteudo e trocado e nao fica nada em dobro.
+(Se preferir importar como fluxo novo, desativar o antigo, senao a planilha e copiada duas vezes a cada 5 minutos.)
+
+Ao abrir o no **Webhook do Supabase**, criar uma credencial **Header Auth**: nome `x-houzze-segredo`, valor uma frase
+longa e aleatoria (guardar, vai ser usada no passo 4). Ativar o fluxo e copiar a URL de producao do webhook
+(`https://<seu n8n>/webhook/houzze-backoffice`).
 
 No no **Evento**, o campo `whatsapp_padrao` pode receber um numero (so digitos, com 55) que recebe os avisos quando
 nenhum corretor ou gerente tiver WhatsApp em `ia_liberacoes`. Pode ficar vazio.
@@ -62,6 +99,7 @@ nenhum corretor ou gerente tiver WhatsApp em `ia_liberacoes`. Pode ficar vazio.
 O que o fluxo faz:
 
 - `ia_envios` novo: manda o texto pelo numero oficial, grava em `ia_mensagens` como `corretor` e marca `enviado` (ou `erro`, com o motivo; o backoffice mostra o balao tracejado).
+- A cada 5 minutos, varre a fila: envio ainda `pendente` ou evento sem `tratado_em` ha mais de 2 minutos sai pelo mesmo caminho. E o que faz uma mensagem escrita antes de o fluxo existir (ou com o n8n fora do ar) sair sozinha depois.
 - `ia_eventos` do tipo `agendamento_atualizado`: acha a linha na aba Leads pela coluna `data_hora` e troca `status`, `visita_dia` e `visita_periodo`.
 - `ia_eventos` do tipo `novo_agendamento` ou `pediu_humano`: manda um modelo (template) de WhatsApp para o corretor que assumiu a conversa; sem corretor, para os gerentes com WhatsApp; sem ninguem, para `whatsapp_padrao`.
 

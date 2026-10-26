@@ -1,0 +1,669 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1",
+              "leftValue": "={{ ['image', 'document'].includes($json.messages?.[0]?.type) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-0030-4c5d-8e9f-0a1b2c3d0030",
+      "name": "Fotos e arquivos",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        624
+      ],
+      "notes": "Mensagens com foto ou PDF (documentos da pre analise). Texto segue pelo outro filtro; audio e figurinha sao ignorados."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "telefone",
+              "value": "={{ $json.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "nome_whatsapp",
+              "value": "={{ $json.contacts?.[0]?.profile?.name || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "wa_id",
+              "value": "={{ $json.messages[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "b4",
+              "name": "tipo_msg",
+              "value": "={{ $json.messages[0].type }}",
+              "type": "string"
+            },
+            {
+              "id": "b5",
+              "name": "media_id",
+              "value": "={{ $json.messages[0].image?.id || $json.messages[0].document?.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "b6",
+              "name": "mime",
+              "value": "={{ $json.messages[0].image?.mime_type || $json.messages[0].document?.mime_type || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "b7",
+              "name": "legenda",
+              "value": "={{ $json.messages[0].image?.caption || $json.messages[0].document?.caption || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "b8",
+              "name": "nome_original",
+              "value": "={{ $json.messages[0].document?.filename || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-0031-4c5d-8e9f-0a1b2c3d0031",
+      "name": "Dados do arquivo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ia_conversas",
+        "returnAll": false,
+        "limit": 1,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $json.telefone }}"
+            }
+          ]
+        }
+      },
+      "id": "e1f2a3b4-0032-4c5d-8e9f-0a1b2c3d0032",
+      "name": "Conversa (documento)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        624
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Traz documento_esperado (o que a Ana pediu por ultimo) e pausada."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide o tipo do documento: pela legenda que veio com o arquivo, senao pelo que a Ana pediu por ultimo, senao \"outro\".\nconst d = $('Dados do arquivo').first().json;\nconst conv = $json || {};\nconst leg = (d.legenda || '').toLowerCase();\nconst regras = [\n  ['cnh_rg', /\\b(cnh|rg|identidade|habilita)/],\n  ['comprovante_residencia', /resid|endere|conta de (luz|agua|água|gas|gás)|enel|sabesp|aluguel/],\n  ['imposto_renda', /imposto|\\bir\\b|irpf|declara/],\n  ['certidao_nascimento', /certid|nascimento|casamento/],\n  ['renda', /renda|holerite|contracheque|pagamento|salario|salário|carteira/],\n  ['extrato', /extrato|banc/],\n];\nlet tipo = 'outro';\nfor (const [t, re] of regras) if (re.test(leg)) { tipo = t; break; }\nif (tipo === 'outro' && conv.documento_esperado) tipo = conv.documento_esperado;\nconst mime = d.mime || '';\nconst ext = mime.includes('pdf') ? 'pdf' : mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';\nconst caminho = d.telefone + '/' + Date.now() + '-' + tipo + '.' + ext;\nreturn [{ json: Object.assign({}, d, { tipo, ext, caminho, pausada: conv.pausada === true }) }];"
+      },
+      "id": "e1f2a3b4-0033-4c5d-8e9f-0a1b2c3d0033",
+      "name": "Rotular documento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ \"https://graph.facebook.com/v23.0/\" + $json.media_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0034-4c5d-8e9f-0a1b2c3d0034",
+      "name": "Endereço do arquivo na Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        624
+      ],
+      "notes": "A Meta devolve a URL temporaria do arquivo (vale alguns minutos)."
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "e1f2a3b4-0035-4c5d-8e9f-0a1b2c3d0035",
+      "name": "Baixar arquivo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://roashkfdjgsweuftqhyx.supabase.co/storage/v1/object/documentos/' + $('Rotular documento').first().json.caminho }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "={{ $('Rotular documento').first().json.mime || 'application/octet-stream' }}"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0036-4c5d-8e9f-0a1b2c3d0036",
+      "name": "Guardar no cofre",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2160,
+        624
+      ],
+      "notes": "Sobe o arquivo para o bucket privado \"documentos\" do Supabase, em <telefone>/<timestamp>-<tipo>.<ext>."
+    },
+    {
+      "parameters": {
+        "tableId": "ia_documentos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Rotular documento').first().json.telefone }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $('Rotular documento').first().json.tipo }}"
+            },
+            {
+              "fieldId": "arquivo",
+              "fieldValue": "={{ $('Rotular documento').first().json.caminho }}"
+            },
+            {
+              "fieldId": "mime",
+              "fieldValue": "={{ $('Rotular documento').first().json.mime }}"
+            },
+            {
+              "fieldId": "nome_original",
+              "fieldValue": "={{ $('Rotular documento').first().json.nome_original }}"
+            },
+            {
+              "fieldId": "legenda",
+              "fieldValue": "={{ $('Rotular documento').first().json.legenda }}"
+            },
+            {
+              "fieldId": "wa_id",
+              "fieldValue": "={{ $('Rotular documento').first().json.wa_id }}"
+            }
+          ]
+        }
+      },
+      "id": "e1f2a3b4-0037-4c5d-8e9f-0a1b2c3d0037",
+      "name": "Registrar documento",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "ia_mensagens",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Rotular documento').first().json.telefone }}"
+            },
+            {
+              "fieldId": "nome_whatsapp",
+              "fieldValue": "={{ $('Rotular documento').first().json.nome_whatsapp }}"
+            },
+            {
+              "fieldId": "direcao",
+              "fieldValue": "cliente"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $('Rotular documento').first().json.tipo_msg }}"
+            },
+            {
+              "fieldId": "texto",
+              "fieldValue": "={{ $('Rotular documento').first().json.caminho }}"
+            },
+            {
+              "fieldId": "wa_id",
+              "fieldValue": "={{ $('Rotular documento').first().json.wa_id }}"
+            }
+          ]
+        }
+      },
+      "id": "e1f2a3b4-0038-4c5d-8e9f-0a1b2c3d0038",
+      "name": "Arquivo na conversa",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        624
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "A conversa do backoffice mostra o documento como um balao com link; o texto e o caminho no cofre."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "p2",
+              "leftValue": "={{ $('Rotular documento').first().json.pausada === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-0039-4c5d-8e9f-0a1b2c3d0039",
+      "name": "Equipe assumiu?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        624
+      ],
+      "notes": "Se alguem da equipe assumiu a conversa, o arquivo fica guardado e a confirmacao automatica nao sai."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://roashkfdjgsweuftqhyx.supabase.co/rest/v1/rpc/ia_documentos_faltando",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_telefone: $('Rotular documento').first().json.telefone }) }}",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0040-4c5d-8e9f-0a1b2c3d0040",
+      "name": "O que falta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        624
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resposta automatica, sem passar pela Ana (nao gasta o limite do Groq): o que chegou e o que ainda falta.\nconst r = $('Rotular documento').first().json;\nconst nomes = { cnh_rg: 'a CNH ou RG', comprovante_residencia: 'o comprovante de residência', imposto_renda: 'a declaração de imposto de renda', certidao_nascimento: 'a certidão', renda: 'o comprovante de renda', extrato: 'o extrato bancário' };\nconst resp = $json || {};\nconst faltam = (typeof resp === 'string' ? resp : (resp.data !== undefined ? resp.data : (resp.body !== undefined ? resp.body : ''))) || '';\nlet output;\nif (r.tipo === 'outro') output = 'Recebi o arquivo! Me diz qual documento é esse: CNH ou RG, comprovante de residência, imposto de renda, certidão de nascimento, comprovante de renda ou extrato bancário?';\nelse if (faltam) output = 'Recebi ' + nomes[r.tipo] + '! Ainda faltam: ' + faltam + '. Pode mandar o próximo por aqui mesmo.';\nelse output = 'Recebi ' + nomes[r.tipo] + '! Agora está tudo aqui, obrigada. Já deixo com o corretor para a pré análise.';\nreturn [{ json: { output, telefone: r.telefone, nome_whatsapp: r.nome_whatsapp } }];"
+      },
+      "id": "e1f2a3b4-0041-4c5d-8e9f-0a1b2c3d0041",
+      "name": "Montar confirmação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "ia_mensagens",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $json.telefone }}"
+            },
+            {
+              "fieldId": "nome_whatsapp",
+              "fieldValue": "={{ $json.nome_whatsapp }}"
+            },
+            {
+              "fieldId": "direcao",
+              "fieldValue": "ana"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "text"
+            },
+            {
+              "fieldId": "texto",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "id": "e1f2a3b4-0042-4c5d-8e9f-0a1b2c3d0042",
+      "name": "Gravar confirmação",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        384
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1346907115179061",
+        "recipientPhoneNumber": "={{ $json.telefone }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "e1f2a3b4-0043-4c5d-8e9f-0a1b2c3d0043",
+      "name": "Enviar confirmação",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        3600,
+        624
+      ],
+      "webhookId": "houzze-confirma-doc-0001"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://roashkfdjgsweuftqhyx.supabase.co/rest/v1/ia_documentos_resumo?select=tipos,sem_tipo&limit=1&telefone=like.*' + $('Dados').first().json.telefone.slice(-11) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0020-4c5d-8e9f-0a1b2c3d0020",
+      "name": "Documentos da pessoa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2160,
+        64
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Resumo dos documentos ja recebidos deste telefone (view ia_documentos_resumo: uma linha so). Sem nada, sai um item vazio e a Ana recebe a mensagem como sempre."
+    },
+    {
+      "parameters": {
+        "toolDescription": "Quando a pessoa disser qual documento era o último arquivo que mandou, classifica esse arquivo. Tipos: cnh_rg, comprovante_residencia, imposto_renda, certidao_nascimento, renda, extrato. Devolve true se deu certo.",
+        "method": "POST",
+        "url": "https://roashkfdjgsweuftqhyx.supabase.co/rest/v1/rpc/ia_classificar_ultimo_documento",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_telefone: $('Dados').first().json.telefone, p_tipo: $fromAI('tipo', 'Tipo do documento: cnh_rg, comprovante_residencia, imposto_renda, certidao_nascimento, renda ou extrato', 'string') }) }}",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0021-4c5d-8e9f-0a1b2c3d0021",
+      "name": "classificar_documento",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3184,
+        336
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "agente_texto": "={{ (() => { const ex = [['cnh_rg','CNH ou RG'],['comprovante_residencia','comprovante de residência'],['imposto_renda','declaração de imposto de renda'],['certidao_nascimento','certidão de nascimento ou casamento'],['renda','comprovante de renda formal'],['extrato','extrato bancário dos últimos 6 meses']]; const r = $('Documentos da pessoa').first().json || {}; const rec = Array.isArray(r.tipos) ? r.tipos : []; const semTipo = Number(r.sem_tipo) || 0; if (!rec.length && !semTipo) return $('Dados').first().json.chatInput; const tem = ex.filter(e => rec.includes(e[0])).map(e => e[1]); const falta = ex.filter(e => !rec.includes(e[0])).map(e => e[1]); return 'Documentos desta pessoa já recebidos: ' + (tem.join(', ') || 'nenhum') + (semTipo ? ' (e ' + semTipo + ' arquivo(s) que ela não disse o que é: pergunte qual documento é)' : '') + '. Ainda faltam: ' + (falta.length ? falta.join(', ') : 'nenhum, está completo') + '.\\n\\n' + $('Dados').first().json.chatInput; })() }}",
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Só mensagens de texto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotos e arquivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visto e digitando": {
+      "main": [
+        [
+          {
+            "node": "Documentos da pessoa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Documentos da pessoa": {
+      "main": [
+        [
+          {
+            "node": "Agente Houzze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "classificar_documento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Houzze",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotos e arquivos": {
+      "main": [
+        [
+          {
+            "node": "Dados do arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados do arquivo": {
+      "main": [
+        [
+          {
+            "node": "Conversa (documento)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversa (documento)": {
+      "main": [
+        [
+          {
+            "node": "Rotular documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotular documento": {
+      "main": [
+        [
+          {
+            "node": "Endereço do arquivo na Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Endereço do arquivo na Meta": {
+      "main": [
+        [
+          {
+            "node": "Baixar arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar arquivo": {
+      "main": [
+        [
+          {
+            "node": "Guardar no cofre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar no cofre": {
+      "main": [
+        [
+          {
+            "node": "Registrar documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar documento": {
+      "main": [
+        [
+          {
+            "node": "Arquivo na conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Arquivo na conversa": {
+      "main": [
+        [
+          {
+            "node": "Equipe assumiu?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Equipe assumiu?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "O que falta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "O que falta": {
+      "main": [
+        [
+          {
+            "node": "Montar confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar confirmação": {
+      "main": [
+        [
+          {
+            "node": "Gravar confirmação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nota": "26/10: ramo \"Fotos e arquivos\" (foto ou PDF) baixa da Meta, guarda no bucket documentos, registra em ia_documentos e na conversa, e responde com o que falta (sem passar pela Ana). \"Documentos da pessoa\" entra entre \"Visto e digitando\" e o agente; o texto do agente ganha a lista do que ja chegou. Ferramenta classificar_documento = rpc ia_classificar_ultimo_documento. Credenciais: WhatsApp account e Supabase Houzze (predefinidas no HTTP Request)."
+}
